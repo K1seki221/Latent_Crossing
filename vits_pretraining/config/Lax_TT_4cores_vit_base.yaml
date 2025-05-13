@@ -1,0 +1,92 @@
+depth: 12
+pos_drop: 0.0
+head_drop: 0.1
+embed: conv
+indim: 768
+InputShape: [32,24]
+outdim: 768
+middim: [32,24,24,32]
+rank: 336
+activation: GELU
+attn_drop: 0.0
+proj_drop: 0.0
+heads: 12
+mlp1_outdim: 3072
+mlp1_middim: [32,24,48,64]
+mlp2_InputShape: [48,64]
+mlp2_middim: [48,64,32,24]
+mlp1_rank: False
+mlp2_rank: False
+mlp1_dropout: 0.1
+mlp2_dropout: 0.1
+qkv_bias: True
+mlp1_bias: True
+mlp2_bias: True
+qk_norm: False
+latent_attn: False
+onlyattn: False
+
+InterRes_Pos:
+  q: True
+  k: True
+  v: True
+  out: True
+  mlp1: True
+  mlp2: True
+
+IntraRes_Pos:
+  q: True
+  k: True
+  v: True
+  out: True
+  mlp1: False
+  mlp2: False
+
+InterResGate_Pos:
+  q: True
+  k: True
+  v: True
+  out: True
+  mlp1: True
+  mlp2: True
+
+TenserizedGate_Pos:
+  q: True
+  k: True
+  v: True
+  out: True
+  mlp1: True
+  mlp2: True
+
+IntraResGate_Pos:
+  q: False
+  k: False
+  v: False
+  out: False
+  mlp1: False
+  mlp2: False
+
+LatentAct_Pos:
+  q: False
+  k: False
+  v: False
+  out: False
+  mlp1: False
+  mlp2: False
+
+bn_Pos:
+  q: False
+  k: False
+  v: False
+  out: False
+  mlp1: False
+  mlp2: False
+
+fact_Pos:
+  q: False
+  k: False
+  v: False
+  out: False
+  mlp1: False
+  mlp2: False
+
