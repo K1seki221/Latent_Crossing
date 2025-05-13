@@ -1,11 +1,19 @@
-# LaX official implementation.
+# LaX: Official Implementation
 
-## ViT Pre-training
-Prepare your ImageNet-1k at {data_dir}.
-`cd vits_pretraining`
-Run the pre-training via:
-```
-  bash ./ddp_pretrain_vits.sh 8 \
+## Vision Transformer (ViT) Pre-training
+
+Prepare your ImageNet-1K dataset under `{data_dir}`.
+
+Navigate to the ViT pre-training directory:
+```bash
+cd vits_pretraining
+
+### Launch Pre-training
+
+Run the following command to start pre-training:
+
+```bash
+bash ./ddp_pretrain_vits.sh 8 \
   --data-dir {data_dir} \
   --model {model_name} \
   --batch-size 128 \
@@ -21,14 +29,22 @@ Run the pre-training via:
   --aa original \
   --mixup 0.2
 ```
-For dense models, replace {learning_rate} by 3e-3, and {model_name} by:
-`vit_base_patch16_224`
-or
-`vit_large_patch16_224`
 
-For low-rank models, the {learning_rate} is 1e-3, use the follows to train:
-For example, train LaX-CoLA ViT-B, run:
-```
+### Dense Model Settings
+
+For dense baselines:
+
+* Set `{learning_rate}` to `3e-3`
+* Choose `{model_name}` from:
+
+  * `vit_base_patch16_224`
+  * `vit_large_patch16_224`
+
+### Low-Rank Model Settings
+
+For low-rank models, use `{learning_rate} = 1e-3`. For example, to pre-train LaX-CoLA ViT-B:
+
+```bash
 bash ./ddp_pretrain_vits.sh 4 \
   --data-dir {data_dir} \
   --model Lax_CoLA_vit_base_16_224 \
@@ -46,13 +62,32 @@ bash ./ddp_pretrain_vits.sh 4 \
   --aa original \
   --mixup 0.2
 ```
-For SVD and LaX-SVD, replace {model_name} by one of the follows:
-`[Plain_CoLA_base_16_224_Ablation_SVD, Plain_CoLA_base_16_224_Ablation_LaxSVD，Plain_CoLA_large_16_224_Ablation_SVD, Plain_CoLA_large_16_224_Ablation_LaxSVD]`
 
-For TT and LaX-TT, replace {model_name} by one of the follows:
-`[Plain_TT_4cores_vit_base, Lax_TT_4cores_vit_base, Plain_TT_4cores_vit_large, Lax_TT_4cores_vit_large]`
+### Supported Model Variants
 
-For CoLA and LaX-CoLA, replace {model_name} by one of the follows:
-`[Plain_CoLA_vit_base_16_224, Lax_CoLA_vit_base_16_224, Plain_CoLA_vit_large_16_224, Lax_CoLA_vit_large_16_224]`
+* **SVD / LaX-SVD:**
 
+  ```
+  Plain_CoLA_base_16_224_Ablation_SVD
+  Plain_CoLA_base_16_224_Ablation_LaxSVD
+  Plain_CoLA_large_16_224_Ablation_SVD
+  Plain_CoLA_large_16_224_Ablation_LaxSVD
+  ```
 
+* **Tensor Train (TT) / LaX-TT:**
+
+  ```
+  Plain_TT_4cores_vit_base
+  Lax_TT_4cores_vit_base
+  Plain_TT_4cores_vit_large
+  Lax_TT_4cores_vit_large
+  ```
+
+* **CoLA / LaX-CoLA:**
+
+  ```
+  Plain_CoLA_vit_base_16_224
+  Lax_CoLA_vit_base_16_224
+  Plain_CoLA_vit_large_16_224
+  Lax_CoLA_vit_large_16_224
+  ```
