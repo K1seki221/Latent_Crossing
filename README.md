@@ -1,18 +1,16 @@
 # LaX: Official Implementation
 
-## Vision Transformer (ViT) Pre-training
+## ViTs Pre-training
 
 Prepare your ImageNet-1K dataset under `{data_dir}`.
 
-Navigate to the ViT pre-training directory:
-```bash
-cd vits_pretraining
+Navigate to the ViT pre-training directory by `cd vits_pretraining`
 
 ### Launch Pre-training
 
 Run the following command to start pre-training:
 
-```bash
+```
 bash ./ddp_pretrain_vits.sh 8 \
   --data-dir {data_dir} \
   --model {model_name} \
@@ -45,7 +43,7 @@ For dense baselines:
 For low-rank models, use `{learning_rate} = 1e-3`. For example, to pre-train LaX-CoLA ViT-B:
 
 ```bash
-bash ./ddp_pretrain_vits.sh 4 \
+bash ./ddp_pretrain_lax_vit.sh 8 \
   --data-dir {data_dir} \
   --model Lax_CoLA_vit_base_16_224 \
   --batch-size 128 \
@@ -91,3 +89,10 @@ bash ./ddp_pretrain_vits.sh 4 \
   Plain_CoLA_vit_large_16_224
   Lax_CoLA_vit_large_16_224
   ```
+## LLMs Pre-training
+Coming Soon.
+
+## LaX-LoRA Fine-Tuning
+Coming Soon.
+
+
