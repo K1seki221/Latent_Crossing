@@ -479,7 +479,10 @@ def main():
             file=args.pretrained_path,
             num_classes=-1,  # force head adaptation
         )
-    model = create_model(
+    import yaml
+    model = create_model(args.model, pretrained=False, num_classes=1000, in_chans=3)  
+
+    """ model = create_model(
         args.model,
         pretrained=args.pretrained,
         in_chans=in_chans,
@@ -494,7 +497,7 @@ def main():
         checkpoint_path=args.initial_checkpoint,
         **factory_kwargs,
         **args.model_kwargs,
-    )
+    ) """
     if args.head_init_scale is not None:
         with torch.no_grad():
             model.get_classifier().weight.mul_(args.head_init_scale)
@@ -635,6 +638,7 @@ def main():
         else:
             if utils.is_primary(args):
                 _logger.info("Using native Torch DistributedDataParallel.")
+            model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             model = NativeDDP(model, device_ids=[device], broadcast_buffers=not args.no_ddp_bb)
         # NOTE: EMA model does not need to be wrapped by DDP
 
@@ -650,7 +654,6 @@ def main():
         input_img_mode = 'RGB' if data_config['input_size'][0] == 3 else 'L'
     else:
         input_img_mode = args.input_img_mode
-
     dataset_train = create_dataset(
         args.dataset,
         root=args.data_dir,
@@ -847,7 +850,7 @@ def main():
                 _logger.warning(
                     "You've requested to log metrics to wandb but package not found. "
                     "Metrics not being logged to wandb, try `pip install wandb`")
-
+    
     # setup learning rate schedule and starting epoch
     updates_per_epoch = (len(loader_train) + args.grad_accum_steps - 1) // args.grad_accum_steps
     lr_scheduler, num_epochs = create_scheduler_v2(
@@ -902,10 +905,14 @@ def main():
                 num_updates_total=num_epochs * updates_per_epoch,
             )
 
+            compiled_model = model
+
             if args.distributed and args.dist_bn in ('broadcast', 'reduce'):
                 if utils.is_primary(args):
                     _logger.info("Distributing BatchNorm running means and vars")
                 utils.distribute_bn(model, args.world_size, args.dist_bn == 'reduce')
+            if args.torchcompile:
+                model = model._orig_mod if hasattr(model, "_orig_mod") else model
 
             if loader_eval is not None:
                 eval_metrics = validate(
@@ -934,7 +941,8 @@ def main():
                     eval_metrics = ema_eval_metrics
             else:
                 eval_metrics = None
-
+            if args.torchcompile:
+                model = compiled_model  
             if output_dir is not None:
                 lrs = [param_group['lr'] for param_group in optimizer.param_groups]
                 utils.update_summary(
@@ -1081,8 +1089,16 @@ def train_one_epoch(
         else:
             loss = _forward()
             _backward(loss)
+        for name, p in model.named_parameters():
+            if p.grad is not None:
+                if p.grad.shape == (1,12,12) and p.grad.stride() == (1,12,1):
+                    print("Suspicious:", name, p.shape, p.grad.shape, p.grad.stride())
 
+        for name, param in model.named_parameters():
+            if param.requires_grad and param.grad is None:
+                print(f"  ❌ {name}")
         losses_m.update(loss.item() * accum_steps, input.size(0))
+
         update_sample_count += input.size(0)
 
         if not need_update:
